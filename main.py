@@ -86,7 +86,7 @@ class MainFrame(Frame):
         self.var_wordwrap = BooleanVar()
         self.format_menu.add_checkbutton(label="Word Wrap", onvalue=1, offvalue=0, variable=self.var_wordwrap,
                                          command=lambda: self.toggle_wrap(self.text_box, self.var_wordwrap))
-        self.format_menu.add_command(label="Font...", command=lambda: self.edit_font(self.text_box))
+        self.format_menu.add_command(label="Font...", command=lambda: FontWindow(root, self))
 
         self.pack(expand=True, fill=BOTH)
 
@@ -128,43 +128,6 @@ class MainFrame(Frame):
     def toggle_wrap(self, text_box, word_wrap):
         pass
 
-    def edit_font(self, text_box):
-        # Create font window
-        font_window = Toplevel(root)
-        font_window.title('Font')
-        font_window.geometry('480x480')
-        font_window.resizable(False, False)
-
-        # Font window labelling
-        lbl_font = Label(font_window, text="Font:{0}".format(" " * 35))
-        lbl_font_size = Label(font_window, text="Font Size:{0}".format(" " * 15))
-        lbl_font.grid(row=0, column=0, padx=5, columnspan=2)
-        lbl_font_size.grid(row=0, column=3, padx=5, columnspan=2)
-
-        # lists font family
-        font_families = font.families()
-        cbx_font = ttk.Combobox(font_window, width=20)
-        cbx_font['values'] = font_families
-        cbx_font.grid(row=1, column=0, padx=5, columnspan=2)
-
-        # lists ints
-        cbx_font_size = ttk.Combobox(font_window, width=14)
-        cbx_font_size['values'] = tuple(range(8, 80, 1))
-        cbx_font_size.grid(row=1, column=3, padx=5, columnspan=2)
-
-        # Button
-        btn_confirm = Button(font_window, text="Ok",
-                             command=lambda: self.font_window_exit(text_box, cbx_font.get(), cbx_font_size.get(),
-                                                                   font_window))
-        btn_confirm.grid(row=4, column=9)
-
-        btn_cancel = Button(font_window, text="Cancel", command=lambda: font_window.destroy())
-        btn_cancel.grid(row=4, column=10)
-
-    def font_window_exit(self, text_box, font_group, font_size, new_window):
-        text_box.config(font=(font_group, font_size))
-        new_window.destroy()
-
     def zoom_in(self, text_box):
         pass
 
@@ -176,6 +139,50 @@ class MainFrame(Frame):
 
     def toggle_status_bar(self):
         pass
+
+
+class FontWindow(Toplevel):
+    def __init__(self, master, main_frame):
+        super().__init__(master)
+        self.mainframe = main_frame
+        # Adjust window
+        self.title('Font')
+        self.geometry('480x480')
+        self.resizable(False, False)
+        # Initialize variables
+        self.lbl_font, self.lbl_font_size, \
+            self.cbx_font, self.cbx_font_size, \
+            self.btn_confirm, self.btn_cancel = [None] * 6
+        self.widgets()
+
+    def widgets(self):
+        # Font window labelling
+        self.lbl_font = Label(self, text="Font:{0}".format(" " * 35))
+        self.lbl_font_size = Label(self, text="Font Size:{0}".format(" " * 15))
+        self.lbl_font.grid(row=0, column=0, padx=5, columnspan=2)
+        self.lbl_font_size.grid(row=0, column=3, padx=5, columnspan=2)
+
+        # List font families
+        font_families = font.families()
+        self.cbx_font = ttk.Combobox(self, width=20)
+        self.cbx_font['values'] = font_families
+        self.cbx_font.grid(row=1, column=0, padx=5, columnspan=2)
+
+        # List font sizes
+        self.cbx_font_size = ttk.Combobox(self, width=14)
+        self.cbx_font_size['values'] = tuple(range(8, 72, 1))
+        self.cbx_font_size.grid(row=1, column=3, padx=5, columnspan=2)
+
+        # Button
+        self.btn_confirm = Button(self, text="Ok", command=self.exit)
+        self.btn_confirm.grid(row=4, column=9)
+
+        self.btn_cancel = Button(self, text="Cancel", command=self.destroy)
+        self.btn_cancel.grid(row=4, column=10)
+
+    def exit(self):
+        self.mainframe.text_box.config(font=(self.cbx_font.get(), self.cbx_font_size.get()))
+        self.destroy()
 
 
 if __name__ == "__main__":
