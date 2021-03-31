@@ -129,37 +129,39 @@ class MainFrame(Frame):
         pass
 
     def edit_font(self, text_box):
-        # Creates TopLevel
-        new_window = Toplevel(root)
-        new_window.title('Font')
-        new_window.geometry('500x480')
+        # Create font window
+        font_window = Toplevel(root)
+        font_window.title('Font')
+        font_window.geometry('480x480')
+        font_window.resizable(False, False)
 
-        # TopLevel Labelling
-        window_label_fonts = Label(new_window, text="Font:{0}".format(" " * 35))
-        window_label_size = Label(new_window, text="Font Size:{0}".format(" " * 15))
-        window_label_fonts.grid(row=0, column=0, padx=5, columnspan=2)
-        window_label_size.grid(row=0, column=3, padx=5, columnspan=2)
+        # Font window labelling
+        lbl_font = Label(font_window, text="Font:{0}".format(" " * 35))
+        lbl_font_size = Label(font_window, text="Font Size:{0}".format(" " * 15))
+        lbl_font.grid(row=0, column=0, padx=5, columnspan=2)
+        lbl_font_size.grid(row=0, column=3, padx=5, columnspan=2)
 
         # lists font family
-        font_tuple = font.families()
-        font_group = ttk.Combobox(new_window, width=20)
-        font_group['values'] = font_tuple
-        font_group.grid(row=1, column=0, padx=5, columnspan=2)
+        font_families = font.families()
+        cbx_font = ttk.Combobox(font_window, width=20)
+        cbx_font['values'] = font_families
+        cbx_font.grid(row=1, column=0, padx=5, columnspan=2)
 
         # lists ints
-        font_size = ttk.Combobox(new_window, width=14)
-        font_size['values'] = tuple(range(8, 80, 1))
-        font_size.grid(row=1, column=3, padx=5, columnspan=2)
+        cbx_font_size = ttk.Combobox(font_window, width=14)
+        cbx_font_size['values'] = tuple(range(8, 80, 1))
+        cbx_font_size.grid(row=1, column=3, padx=5, columnspan=2)
 
         # Button
-        confirm = Button(new_window, text="Ok",
-                         command=lambda: self.exit(text_box, font_group.get(), font_size.get(), new_window))
-        confirm.grid(row=4, column=9)
+        btn_confirm = Button(font_window, text="Ok",
+                             command=lambda: self.font_window_exit(text_box, cbx_font.get(), cbx_font_size.get(),
+                                                                   font_window))
+        btn_confirm.grid(row=4, column=9)
 
-        cancel = Button(new_window, text="Cancel", command=lambda: new_window.destroy())
-        cancel.grid(row=4, column=10)
+        btn_cancel = Button(font_window, text="Cancel", command=lambda: font_window.destroy())
+        btn_cancel.grid(row=4, column=10)
 
-    def exit(self, text_box, font_group, font_size, new_window):
+    def font_window_exit(self, text_box, font_group, font_size, new_window):
         text_box.config(font=(font_group, font_size))
         new_window.destroy()
 
@@ -179,5 +181,5 @@ class MainFrame(Frame):
 if __name__ == "__main__":
     root = Tk()
     root.geometry("700x600")
-    main_frame = MainFrame(root)
+    mainframe = MainFrame(root)
     root.mainloop()
