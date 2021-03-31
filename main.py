@@ -13,8 +13,8 @@ class MainFrame(Frame):
         super().__init__(master)
         # Initialize variables
         self.y_scrollbar, self.text_box, self.menu_bar, \
-            self.file_menu, self.edit_menu, self.format_menu, self.view_menu, self.help_menu, \
-            self.var_wordwrap, self.var_status_bar_shown = [None] * 10
+        self.file_menu, self.edit_menu, self.format_menu, self.view_menu, self.help_menu, \
+        self.var_wordwrap, self.var_status_bar_shown = [None] * 10
         self.widgets()
 
     def widgets(self):
@@ -147,41 +147,73 @@ class FontWindow(Toplevel):
         self.mainframe = main_frame
         # Adjust window
         self.title('Font')
-        self.geometry('480x480')
+        self.geometry('320x480')
         self.resizable(False, False)
         # Initialize variables
-        self.lbl_font, self.lbl_font_size, \
-            self.cbx_font, self.cbx_font_size, \
-            self.btn_confirm, self.btn_cancel = [None] * 6
+        self.lbl_font, self.lbl_size, self.lbl_sample, \
+            self.cbx_font, self.cbx_size, \
+            self.btn_confirm, self.btn_cancel, \
+            self.textbox_font, self.textbox_size, \
+            self.canvas_sample, \
+            self.text_sample = [None] * 11
         self.widgets()
 
     def widgets(self):
-        # Font window labelling
-        self.lbl_font = Label(self, text="Font:{0}".format(" " * 35))
-        self.lbl_font_size = Label(self, text="Font Size:{0}".format(" " * 15))
-        self.lbl_font.grid(row=0, column=0, padx=5, columnspan=2)
-        self.lbl_font_size.grid(row=0, column=3, padx=5, columnspan=2)
+        # Font currently used in text box
+        textbox_font_and_size = self.mainframe.text_box['font']
+        self.textbox_font = textbox_font_and_size.rsplit(' ', 1)[0].replace('{', '').replace('}', '')
+        self.textbox_size = textbox_font_and_size.split()[-1]
 
-        # List font families
+        # Font label
+        self.lbl_font = Label(self, text="Font:")
+        self.lbl_font.place(x=10, y=10)
+
+        # Font combobox
         font_families = font.families()
-        self.cbx_font = ttk.Combobox(self, width=20)
+        self.cbx_font = ttk.Combobox(self, width=22)
         self.cbx_font['values'] = font_families
-        self.cbx_font.grid(row=1, column=0, padx=5, columnspan=2)
+        self.cbx_font.current(self.cbx_font['values'].index(self.textbox_font))
+        self.cbx_font.bind('<<ComboboxSelected>>', self.update_sample)
+        self.cbx_font.place(x=10, y=35)
 
-        # List font sizes
-        self.cbx_font_size = ttk.Combobox(self, width=14)
-        self.cbx_font_size['values'] = tuple(range(8, 72, 1))
-        self.cbx_font_size.grid(row=1, column=3, padx=5, columnspan=2)
+        # Font size label
+        self.lbl_size = Label(self, text="Size:")
+        self.lbl_size.place(x=230, y=10)
 
-        # Button
-        self.btn_confirm = Button(self, text="Ok", command=self.exit)
-        self.btn_confirm.grid(row=4, column=9)
+        # Font size combobox
+        self.cbx_size = ttk.Combobox(self, width=6)
+        self.cbx_size['values'] = tuple(range(8, 73, 1))
+        self.cbx_size.current(self.cbx_size['values'].index(self.textbox_size))
+        self.cbx_size.bind('<<ComboboxSelected>>', self.update_sample)
+        self.cbx_size.place(x=230, y=35)
 
-        self.btn_cancel = Button(self, text="Cancel", command=self.destroy)
-        self.btn_cancel.grid(row=4, column=10)
+        # Sample canvas
+        self.canvas_sample = Canvas(self, width=250, height=100, highlightbackground="#cdcdcd", highlightthickness=1)
+        self.canvas_sample.place(x=10, y=100)
+        self.text_sample = self.canvas_sample.create_text(125, 50, anchor=CENTER, text='AaBbYyZz',
+                                                          font=(self.cbx_font.get(), self.cbx_size.get()))
+
+        # Sample label
+        self.lbl_sample = Label(self, text="Sample")
+        self.lbl_sample.place(x=15, y=85)
+
+        # OK button
+        self.btn_confirm = Button(self, text="Ok", width=10, command=self.exit)
+        self.btn_confirm.place(x=115, y=420)
+
+        # Cancel button
+        self.btn_cancel = Button(self, text="Cancel", width=10, command=self.destroy)
+        self.btn_cancel.place(x=220, y=420)
+
+    def update_sample(self, event):
+        new_font = self.cbx_font.get() if self.cbx_font.get() else self.textbox_font
+        new_size = self.cbx_size.get() if self.cbx_size.get() else self.textbox_size
+        self.canvas_sample.itemconfigure(self.text_sample, font=(new_font, new_size))
 
     def exit(self):
-        self.mainframe.text_box.config(font=(self.cbx_font.get(), self.cbx_font_size.get()))
+        new_font = self.cbx_font.get() if self.cbx_font.get() else self.textbox_font
+        new_size = self.cbx_size.get() if self.cbx_size.get() else self.textbox_size
+        self.mainframe.text_box.config(font=(new_font, new_size))
         self.destroy()
 
 
