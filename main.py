@@ -55,11 +55,11 @@ class MainFrame(Frame):
         self.menu_bar.add_cascade(label="Help", menu=self.help_menu)
 
         # File menu commands
-        self.file_menu.add_command(label="New", accelerator="Ctrl+N", command=lambda: self.new_file(self.text_box))
-        self.file_menu.add_command(label="Open...", accelerator="Ctrl+O", command=lambda: self.open_file(self.text_box))
-        self.file_menu.add_command(label="Save", accelerator="Ctrl+S", command=lambda: self.save_file(self.text_box))
+        self.file_menu.add_command(label="New", accelerator="Ctrl+N", command=lambda: self.new_file(None))
+        self.file_menu.add_command(label="Open...", accelerator="Ctrl+O", command=lambda: self.open_file(None))
+        self.file_menu.add_command(label="Save", accelerator="Ctrl+S", command=lambda: self.save_file(None))
         self.file_menu.add_command(label="Save As...", accelerator="Ctrl+Shift+S",
-                                   command=lambda: self.save_as_file(self.text_box))
+                                   command=lambda: self.save_as_file(None))
         self.file_menu.add_separator()
         self.file_menu.add_command(label="Exit", command=self.master.quit)
 
@@ -76,30 +76,30 @@ class MainFrame(Frame):
                                    command=lambda: self.master.focus_get().event_generate("<<Clear>>"))
         self.edit_menu.add_separator()
         self.edit_menu.add_command(label="Find...", accelerator="Ctrl+F", state=DISABLED,
-                                   command=lambda: self.find_text(self.text_box))
+                                   command=lambda: self.find_text(None))
         self.edit_menu.add_command(label="Replace...", accelerator="Ctrl+H",
-                                   command=lambda: self.replace_text(self.text_box))
+                                   command=lambda: self.replace_text(None))
         self.edit_menu.add_separator()
         self.edit_menu.add_command(label="Select All", accelerator="Ctrl+A",
                                    command=lambda: self.master.focus_get().event_generate("<<SelectAll>>"))
         self.edit_menu.add_command(label="Time/Date", accelerator="F5",
-                                   command=lambda: self.show_datetime(self.text_box))
+                                   command=lambda: self.show_datetime(None))
 
         # Format menu commands
         self.var_wordwrap = BooleanVar()
         self.format_menu.add_checkbutton(label="Word Wrap", onvalue=1, offvalue=0, variable=self.var_wordwrap,
-                                         command=lambda: self.toggle_wrap(self.text_box, self.var_wordwrap))
+                                         command=lambda: self.toggle_wrap)
         self.format_menu.add_command(label="Font...", command=lambda: FontWindow(root, self))
 
         self.pack(expand=True, fill=BOTH)
 
         # View menu commands
         self.view_menu.add_command(label="Zoom In", accelerator="Ctrl+Equal",
-                                   command=lambda: self.zoom_in(event=None))
+                                   command=lambda: self.zoom_in(None))
         self.view_menu.add_command(label="Zoom Out", accelerator="Ctrl+Minus",
-                                   command=lambda: self.zoom_out(event=None))
+                                   command=lambda: self.zoom_out(None))
         self.view_menu.add_command(label="Restore Default Zoom", accelerator="Ctrl+0",
-                                   command=lambda: self.restore_zoom(event=None))
+                                   command=lambda: self.restore_zoom(None))
         self.var_status_bar_shown = BooleanVar()
         self.var_status_bar_shown.set(True)
         self.view_menu.add_checkbutton(label="Status Bar", onvalue=True, offvalue=False,
