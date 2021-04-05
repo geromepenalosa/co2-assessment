@@ -12,9 +12,12 @@ class MainFrame(Frame):
     def __init__(self, master):
         super().__init__(master)
         # Initialize variables
-        self.y_scrollbar, self.text_box, self.menu_bar, \
-        self.file_menu, self.edit_menu, self.format_menu, self.view_menu, self.help_menu, \
-        self.var_wordwrap, self.var_status_bar_shown = [None] * 10
+        self.y_scrollbar, self.text_box, self.menu_bar, self.status_bar, \
+            self.file_menu, self.edit_menu, self.format_menu, self.view_menu, self.help_menu, \
+            self.var_wordwrap, self.var_status_bar_shown = [None] * 11
+        self.font_size = 11
+        self.zoom_scale = 1
+        self.zoom_count = 100
         self.widgets()
 
     def widgets(self):
@@ -24,7 +27,7 @@ class MainFrame(Frame):
 
         # Text box
         self.text_box = Text(self,
-                             font=("Consolas", 11),
+                             font=("Consolas", self.font_size),
                              undo=True,
                              yscrollcommand=self.y_scrollbar.set,
                              selectbackground="#0078d7", selectforeground="white")
@@ -91,18 +94,30 @@ class MainFrame(Frame):
         self.pack(expand=True, fill=BOTH)
 
         # View menu commands
-        self.view_menu.add_command(label="Zoom In", accelerator="Ctrl+Plus",
-                                   command=lambda: self.zoom_in(self.text_box))
+        self.view_menu.add_command(label="Zoom In", accelerator="Ctrl+Equal",
+                                   command=lambda: self.zoom_in(event=None))
         self.view_menu.add_command(label="Zoom Out", accelerator="Ctrl+Minus",
-                                   command=lambda: self.zoom_out(self.text_box))
+                                   command=lambda: self.zoom_out(event=None))
         self.view_menu.add_command(label="Restore Default Zoom", accelerator="Ctrl+0",
-                                   command=lambda: self.restore_zoom(self.text_box))
+                                   command=lambda: self.restore_zoom(event=None))
         self.var_status_bar_shown = BooleanVar()
-        self.view_menu.add_checkbutton(label="Status Bar", onvalue=1, offvalue=0, variable=self.var_status_bar_shown,
+        self.var_status_bar_shown.set(True)
+        self.view_menu.add_checkbutton(label="Status Bar", onvalue=True, offvalue=False,
+                                       variable=self.var_status_bar_shown,
                                        command=self.toggle_status_bar)
 
         # Help commands
         self.help_menu.add_command(label="About Clonepad")
+
+        # Zoom bindings
+        self.text_box.bind("<Control-MouseWheel>", self.mouse_wheel)
+        self.text_box.bind("<Control-equal>", self.zoom_in)
+        self.text_box.bind("<Control-minus>", self.zoom_out)
+        self.text_box.bind("<Control-0>", self.restore_zoom)
+
+        # Status bar
+        self.status_bar = StatusBar(self.text_box)
+        self.text_box.bind('<<Modified>>', self.status_bar.check)
 
     def new_file(self, text_box):
         pass
@@ -128,17 +143,47 @@ class MainFrame(Frame):
     def toggle_wrap(self, text_box, word_wrap):
         pass
 
-    def zoom_in(self, text_box):
-        pass
+    def mouse_wheel(self, event):
+        if event.delta == -120:
+            self.zoom_out(event)
+        if event.delta == 120:
+            self.zoom_in(event)
 
-    def zoom_out(self, text_box):
-        pass
+    def zoom_in(self, event):
+        textbox_font_and_size = self.text_box['font']
+        current_font = textbox_font_and_size.rsplit(' ', 1)[0].replace('{', '').replace('}', '')
+        if self.zoom_count < 500:  # 500% is the maximum percentage to zoom-in
+            self.zoom_scale += 1
+            self.zoom_count += 10
+            font_size = self.font_size + self.zoom_scale
+            self.text_box.config(font=(current_font, font_size))
+        self.status_bar.lbl_zoom_count.config(text=f'{self.zoom_count}%')
 
-    def restore_zoom(self, text_box):
-        pass
+    def zoom_out(self, event):
+        textbox_font = self.text_box['font']
+        current_font = textbox_font.rsplit(' ', 1)[0].replace('{', '').replace('}', '')
+        if self.zoom_count >= 20:  # 10% is the minimum zoom_count
+            self.zoom_scale -= 1
+            self.zoom_count -= 10
+            font_size = self.font_size + self.zoom_scale
+            self.text_box.config(font=(current_font, font_size))
+        self.status_bar.lbl_zoom_count.config(text=f'{self.zoom_count}%')
+
+    def restore_zoom(self, event):
+        textbox_font = self.text_box['font']
+        current_font = textbox_font.rsplit(' ', 1)[0].replace('{', '').replace('}', '')
+        self.zoom_scale = 1
+        self.zoom_count = 100
+        self.text_box.config(font=(current_font, self.font_size))
+        self.status_bar.lbl_zoom_count.config(text=f'{self.zoom_count}%')
 
     def toggle_status_bar(self):
-        pass
+        if self.var_status_bar_shown:
+            self.status_bar.pack_forget()
+            self.var_status_bar_shown = False
+        else:
+            self.status_bar.pack(side=BOTTOM, fill='x')
+            self.var_status_bar_shown = True
 
 
 class FontWindow(Toplevel):
@@ -147,22 +192,22 @@ class FontWindow(Toplevel):
         self.mainframe = main_frame
         # Adjust window
         self.title('Font')
-        self.geometry('320x480')
+        self.geometry('320x320')
         self.resizable(False, False)
         # Initialize variables
         self.lbl_font, self.lbl_size, self.lbl_sample, \
-            self.cbx_font, self.cbx_size, \
-            self.btn_confirm, self.btn_cancel, \
-            self.textbox_font, self.textbox_size, \
-            self.canvas_sample, \
-            self.text_sample = [None] * 11
+        self.cbx_font, self.cbx_size, \
+        self.btn_confirm, self.btn_cancel, \
+        self.textbox_font, self.textbox_size, \
+        self.canvas_sample, \
+        self.text_sample = [None] * 11
         self.widgets()
 
     def widgets(self):
         # Font currently used in text box
         textbox_font_and_size = self.mainframe.text_box['font']
         self.textbox_font = textbox_font_and_size.rsplit(' ', 1)[0].replace('{', '').replace('}', '')
-        self.textbox_size = textbox_font_and_size.split()[-1]
+        self.textbox_size = str(self.mainframe.font_size)
 
         # Font label
         self.lbl_font = Label(self, text="Font:")
@@ -198,12 +243,12 @@ class FontWindow(Toplevel):
         self.lbl_sample.place(x=15, y=85)
 
         # OK button
-        self.btn_confirm = Button(self, text="Ok", width=10, command=self.exit)
-        self.btn_confirm.place(x=115, y=420)
+        self.btn_confirm = Button(self, text="OK", width=10, command=self.exit)
+        self.btn_confirm.place(x=115, y=275)
 
         # Cancel button
         self.btn_cancel = Button(self, text="Cancel", width=10, command=self.destroy)
-        self.btn_cancel.place(x=220, y=420)
+        self.btn_cancel.place(x=220, y=275)
 
     def update_sample(self, event):
         new_font = self.cbx_font.get() if self.cbx_font.get() else self.textbox_font
@@ -213,8 +258,36 @@ class FontWindow(Toplevel):
     def exit(self):
         new_font = self.cbx_font.get() if self.cbx_font.get() else self.textbox_font
         new_size = self.cbx_size.get() if self.cbx_size.get() else self.textbox_size
-        self.mainframe.text_box.config(font=(new_font, new_size))
+        self.mainframe.text_box.config(font=(new_font, int(new_size) + self.mainframe.zoom_scale))
+        self.mainframe.font_size = int(new_size)
         self.destroy()
+
+
+class StatusBar(Frame):
+    def __init__(self, master):
+        super().__init__(master)
+        # Initialize variables
+        self.lbl_word_count, self.lbl_char_count, self.lbl_zoom_count = [None] * 3
+        self.widgets()
+        self.pack(side=BOTTOM, fill=X)
+
+    def widgets(self):
+        self.lbl_word_count = Label(self, text='Words: 0 ')
+        self.lbl_word_count.grid(row=0, column=0, rowspan=2)
+
+        self.lbl_char_count = Label(self, text='Characters: 0     |')
+        self.lbl_char_count.grid(row=0, column=1, rowspan=2)
+
+        self.lbl_zoom_count = Label(self, text='100%')
+        self.lbl_zoom_count.grid(row=0, column=2, rowspan=2)
+
+    def check(self, event):
+        if self.master.edit_modified():
+            word_count = len(self.master.get(1.0, 'end-1c').split())
+            character_count = len(self.master.get(1.0, 'end-1c'))
+            self.lbl_word_count.config(text=f'Words: {word_count} ')
+            self.lbl_char_count.config(text=f'Characters: {character_count}     |')
+        self.master.edit_modified(False)
 
 
 if __name__ == "__main__":
