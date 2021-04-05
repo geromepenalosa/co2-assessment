@@ -13,8 +13,8 @@ class MainFrame(Frame):
         super().__init__(master)
         # Initialize variables
         self.y_scrollbar, self.text_box, self.menu_bar, self.status_bar, \
-            self.file_menu, self.edit_menu, self.format_menu, self.view_menu, self.help_menu, \
-            self.var_wordwrap, self.var_status_bar_shown = [None] * 11
+            self.file_menu, self.edit_menu, self.format_menu, self.view_menu, \
+            self.var_wordwrap, self.var_status_bar_shown = [None] * 10
         self.font_size = 11
         self.zoom_scale = 1
         self.zoom_count = 100
@@ -45,14 +45,12 @@ class MainFrame(Frame):
         self.edit_menu = Menu(self.menu_bar, tearoff=False)
         self.format_menu = Menu(self.menu_bar, tearoff=False)
         self.view_menu = Menu(self.menu_bar, tearoff=False)
-        self.help_menu = Menu(self.menu_bar, tearoff=False)
 
         # Add menu cascades to menu bar
         self.menu_bar.add_cascade(label="File", menu=self.file_menu)
         self.menu_bar.add_cascade(label="Edit", menu=self.edit_menu)
         self.menu_bar.add_cascade(label="Format", menu=self.format_menu)
         self.menu_bar.add_cascade(label="View", menu=self.view_menu)
-        self.menu_bar.add_cascade(label="Help", menu=self.help_menu)
 
         # File menu commands
         self.file_menu.add_command(label="New", accelerator="Ctrl+N", command=lambda: self.new_file(None))
@@ -105,9 +103,6 @@ class MainFrame(Frame):
         self.view_menu.add_checkbutton(label="Status Bar", onvalue=True, offvalue=False,
                                        variable=self.var_status_bar_shown,
                                        command=self.toggle_status_bar)
-
-        # Help commands
-        self.help_menu.add_command(label="About Clonepad")
 
         # Zoom bindings
         self.text_box.bind("<Control-MouseWheel>", self.mouse_wheel)
