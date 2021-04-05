@@ -119,28 +119,28 @@ class MainFrame(Frame):
         self.status_bar = StatusBar(self.text_box)
         self.text_box.bind('<<Modified>>', self.status_bar.check)
 
-    def new_file(self, text_box):
+    def new_file(self, event):
         pass
 
-    def open_file(self, text_box):
+    def open_file(self, event):
         pass
 
-    def save_file(self, text_box):
+    def save_file(self, event):
         pass
 
-    def save_as_file(self, text_box):
+    def save_as_file(self, event):
         pass
 
-    def find_text(self, text_box):
+    def find_text(self, event):
         pass
 
-    def replace_text(self, text_box):
+    def replace_text(self, event):
         pass
 
-    def show_datetime(self, text_box):
+    def show_datetime(self, event):
         pass
 
-    def toggle_wrap(self, text_box, word_wrap):
+    def toggle_wrap(self):
         pass
 
     def mouse_wheel(self, event):
