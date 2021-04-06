@@ -1,11 +1,16 @@
 import os
-from ctypes import windll
 from tkinter import *
 from tkinter import font
 from tkinter import ttk
+from tkinter import filedialog
 
-# Improve text quality
-windll.shcore.SetProcessDpiAwareness(1)
+# Improve text quality. NOTE: This block of code is ignored on macOS.
+if os.name == 'nt':
+     from ctypes import windll
+     windll.shcore.SetProcessDpiAwareness(1)
+
+global opened_file
+opened_file = False
 
 
 class MainFrame(Frame):
@@ -115,16 +120,66 @@ class MainFrame(Frame):
         self.text_box.bind('<<Modified>>', self.status_bar.check)
 
     def new_file(self, event):
-        pass
+        self.text_box.delete("1.0",END)
+        root.title("New file - Notepad")
 
+        global opened_file
+        opened_file = False
+        
     def open_file(self, event):
-        pass
+        self.text_box.delete("1.0",END)
+        text_file = filedialog.askopenfilename(initialdir="", title="Open File",
+                    filetypes=(("Text files", "*.txt"),("HTML Files","*.html"),("Python files","*.py"),("All files","*.*")))
+                    
+        # Checks for filename existence
+        if text_file:
+            # To access file for later use
+            global opened_file
+            opened_file = text_file
 
-    def save_file(self, event):
-        pass
+        # Update menu bar
+        filename = text_file
+        root.title("{} - Notepad".format(filename))
+
+        # Read file contents
+        text_file = open(text_file,"r")
+        read_text = text_file.read()
+        self.text_box.insert(END, read_text)
+
+        #Close open file selection menu
+        text_file.close()
 
     def save_as_file(self, event):
-        pass
+        text_file = filedialog.asksaveasfilename(defaultextension=".*",initialdir= "", title="Save file as",
+                    filetypes=(("Text files", "*.txt"),("HTML Files","*.html"),("Python files","*.py"),("All files","*.*")))
+        if text_file:
+            # Update menu bar
+            filename = text_file
+            root.title("{} - Notepad (Saved)".format(filename))
+
+            # File saving
+            text_file = open(text_file, "w")
+            text_file.write(self.text_box.get(1.0,END))
+
+            #Close file
+            text_file.close()
+    
+    def save_file(self, event):
+        global opened_file
+        # File saving
+        text_file = open(opened_file, "w")
+        text_file.write(self.text_box.get(1.0,END))
+        #Close file
+        text_file.close()
+        if opened_file == False:
+            text_file = filedialog.asksaveasfilename(defaultextension=".*",initialdir= "", title="Save file as",
+                    filetypes=(("Text files", "*.txt"),("HTML Files","*.html"),("Python files","*.py"),("All files","*.*")))
+            if text_file:
+                filename = text_file
+                root.title("{} - Notepad (Saved)".format(filename))
+                text_file = open(text_file, "w")
+                text_file.write(self.text_box.get(1.0,END))
+                text_file.close()
 
     def find_text(self, event):
         pass
@@ -287,6 +342,7 @@ class StatusBar(Frame):
 
 if __name__ == "__main__":
     root = Tk()
+    root.title("Notepad")
     root.geometry("700x600")
     mainframe = MainFrame(root)
     root.mainloop()
