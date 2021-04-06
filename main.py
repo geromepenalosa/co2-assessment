@@ -10,7 +10,6 @@ if os.name == 'nt':
      windll.shcore.SetProcessDpiAwareness(1)
 
 global opened_file
-opened_file = False
 
 
 class MainFrame(Frame):
@@ -170,7 +169,6 @@ class MainFrame(Frame):
         text_file = open(opened_file, "w")
         text_file.write(self.text_box.get(1.0,END))
         #Close file
-        text_file.close()
         if opened_file == False:
             text_file = filedialog.asksaveasfilename(defaultextension=".*",initialdir= "", title="Save file as",
                     filetypes=(("Text files", "*.txt"),("HTML Files","*.html"),("Python files","*.py"),("All files","*.*")))
@@ -180,6 +178,7 @@ class MainFrame(Frame):
                 text_file = open(text_file, "w")
                 text_file.write(self.text_box.get(1.0,END))
                 text_file.close()
+            text_file.close()
 
     def find_text(self, event):
         pass
@@ -341,6 +340,7 @@ class StatusBar(Frame):
 
 
 if __name__ == "__main__":
+    opened_file = False
     root = Tk()
     root.title("Notepad")
     root.geometry("700x600")

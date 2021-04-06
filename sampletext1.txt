@@ -1,1 +1,2 @@
-Open sesame!
+This is a sample text file - 1
+
