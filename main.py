@@ -4,54 +4,21 @@ from tkinter import font
 from tkinter import ttk
 from tkinter import filedialog
 
-
 # Improve text quality. NOTE: This block of code is ignored on macOS.
 if os.name == 'nt':
-    from ctypes import windll
-
-    windll.shcore.SetProcessDpiAwareness(1)
+     from ctypes import windll
+     windll.shcore.SetProcessDpiAwareness(1)
 
 global opened_file
 
-# Right Click
-class rightClick:
-    def __init__(self, event):
 
-        rclick_Menu = Menu(None, tearoff=0)
-        for txt in ['Undo','Cut', 'Copy']:
-            rclick_Menu.add_command(
-                label=txt, state="normal", command=lambda event = event, text=txt:
-                self.command(event, text))
-            if txt == 'Undo':
-                rclick_Menu.add_separator()
-        rclick_Menu.add_command(
-            label="Paste", state='normal', command=lambda event=event:
-            self.command(event, 'Paste'))
-        rclick_Menu.add_command(
-            label="Delete", state = 'normal', command=lambda event=event:
-            self.command(event, 'Clear'))
-        rclick_Menu.add_separator()
-        rclick_Menu.add_command(
-            label="Select All", state = 'normal', command=lambda event=event:
-            self.command(event, 'SelectAll'))
-
-        rclick_Menu.tk_popup(event.x_root + 40, event.y_root + 10, entry='0')
-
-
-    def command(self, event, cmd):
-        event.widget.event_generate(f'<<{cmd}>>')
-
-class Activator(rightClick):
-    def __init__(self, master):
-        super().__init__(self,master)
-        rightClick.activator()
 class MainFrame(Frame):
     def __init__(self, master):
         super().__init__(master)
         # Initialize variables
         self.y_scrollbar, self.text_box, self.menu_bar, self.status_bar, \
-        self.file_menu, self.edit_menu, self.format_menu, self.view_menu, \
-        self.var_wordwrap, self.var_status_bar_shown = [None] * 10
+            self.file_menu, self.edit_menu, self.format_menu, self.view_menu, \
+            self.var_wordwrap, self.var_status_bar_shown = [None] * 10
         self.font_size = 11
         self.zoom_scale = 1
         self.zoom_count = 100
@@ -69,8 +36,6 @@ class MainFrame(Frame):
                              yscrollcommand=self.y_scrollbar.set,
                              selectbackground="#0078d7", selectforeground="white")
         self.text_box.pack(expand=True, fill=BOTH)
-        self.text_box.bind("<Button-3>", rightClick) # Right Click
-
 
         # Adjust scrollbar to text box
         self.y_scrollbar.config(command=self.text_box.yview)
@@ -153,20 +118,18 @@ class MainFrame(Frame):
         self.status_bar = StatusBar(self.text_box)
         self.text_box.bind('<<Modified>>', self.status_bar.check)
 
-
     def new_file(self, event):
-        self.text_box.delete("1.0", END)
+        self.text_box.delete("1.0",END)
         root.title("New file - Notepad")
 
         global opened_file
         opened_file = False
-
+        
     def open_file(self, event):
-        self.text_box.delete("1.0", END)
+        self.text_box.delete("1.0",END)
         text_file = filedialog.askopenfilename(initialdir="", title="Open File",
-                                               filetypes=(("Text files", "*.txt"), ("HTML Files", "*.html"),
-                                                          ("Python files", "*.py"), ("All files", "*.*")))
-
+                    filetypes=(("Text files", "*.txt"),("HTML Files","*.html"),("Python files","*.py"),("All files","*.*")))
+                    
         # Checks for filename existence
         if text_file:
             # To access file for later use
@@ -178,17 +141,16 @@ class MainFrame(Frame):
         root.title("{} - Notepad".format(filename))
 
         # Read file contents
-        text_file = open(text_file, "r")
+        text_file = open(text_file,"r")
         read_text = text_file.read()
         self.text_box.insert(END, read_text)
 
-        # Close open file selection menu
+        #Close open file selection menu
         text_file.close()
 
     def save_as_file(self, event):
-        text_file = filedialog.asksaveasfilename(defaultextension=".*", initialdir="", title="Save file as",
-                                                 filetypes=(("Text files", "*.txt"), ("HTML Files", "*.html"),
-                                                            ("Python files", "*.py"), ("All files", "*.*")))
+        text_file = filedialog.asksaveasfilename(defaultextension=".*",initialdir= "", title="Save file as",
+                    filetypes=(("Text files", "*.txt"),("HTML Files","*.html"),("Python files","*.py"),("All files","*.*")))
         if text_file:
             # Update menu bar
             filename = text_file
@@ -196,26 +158,25 @@ class MainFrame(Frame):
 
             # File saving
             text_file = open(text_file, "w")
-            text_file.write(self.text_box.get(1.0, END))
+            text_file.write(self.text_box.get(1.0,END))
 
-            # Close file
+            #Close file
             text_file.close()
-
+    
     def save_file(self, event):
         global opened_file
         # File saving
         text_file = open(opened_file, "w")
-        text_file.write(self.text_box.get(1.0, END))
-        # Close file
+        text_file.write(self.text_box.get(1.0,END))
+        #Close file
         if opened_file == False:
-            text_file = filedialog.asksaveasfilename(defaultextension=".*", initialdir="", title="Save file as",
-                                                     filetypes=(("Text files", "*.txt"), ("HTML Files", "*.html"),
-                                                                ("Python files", "*.py"), ("All files", "*.*")))
+            text_file = filedialog.asksaveasfilename(defaultextension=".*",initialdir= "", title="Save file as",
+                    filetypes=(("Text files", "*.txt"),("HTML Files","*.html"),("Python files","*.py"),("All files","*.*")))
             if text_file:
                 filename = text_file
                 root.title("{} - Notepad (Saved)".format(filename))
                 text_file = open(text_file, "w")
-                text_file.write(self.text_box.get(1.0, END))
+                text_file.write(self.text_box.get(1.0,END))
                 text_file.close()
             text_file.close()
 
@@ -376,6 +337,7 @@ class StatusBar(Frame):
             self.lbl_word_count.config(text=f'Words: {word_count} ')
             self.lbl_char_count.config(text=f'Characters: {character_count}     |')
         self.master.edit_modified(False)
+
 
 if __name__ == "__main__":
     opened_file = False
